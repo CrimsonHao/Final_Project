@@ -6,59 +6,55 @@ namespace Assets.Code
 {
     public class New_Waypoint : Waypoints
     {
-        [SerializeField] protected float conectivityRad = 50f;
+        [SerializeField] protected float conectivityRad = 50f; //Radio de conectividad; donde se detectan entre si los waypoints
 
-        List<New_Waypoint> connections;
+        List<New_Waypoint> connections; //Se declara la lista de new_waypoints
 
         public void Start()
         {
-            //Grab all waypoints in scene
-            GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint");
+            GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint"); //Coloca todos los game objects con tag "Waypoint" en un array
 
-            //Create a list of such waypoints
-            connections = new List<New_Waypoint>();
+            connections = new List<New_Waypoint>(); //Se inicializa la lista de new_waypoints
 
-            //Check if they are a connected waypoint
-            for(int i = 0; i < allWaypoints.Length; i++)
+            for (int i = 0; i < allWaypoints.Length; i++) //Por cada objecto del array...
             {
-                New_Waypoint nextWaypoint = allWaypoints[i].GetComponent<New_Waypoint>();
+                New_Waypoint nextWaypoint = allWaypoints[i].GetComponent<New_Waypoint>(); //Establece a nextWaypoint el componente new_waypoint del objeto del array
 
-                if(nextWaypoint != null)
+                if(nextWaypoint != null) //Revisa que contenga algo
                 {
-                    if(Vector3.Distance(this.transform.position, nextWaypoint.transform.position) <= conectivityRad && nextWaypoint != this)
+                    if(Vector3.Distance(this.transform.position, nextWaypoint.transform.position) <= conectivityRad && nextWaypoint != this) //Revisa si la distancia entre este objecto y nextWaypoint es <= al radio de conectividad Y nextwaypoint no se si mismo
                     {
-                        connections.Add(nextWaypoint);
+                        connections.Add(nextWaypoint); //Se agrega a la lista
                     }
                 }
             }
         }
 
-        public override void OnDrawGizmos()
+        public override void OnDrawGizmos() //Dibuja el radio de localizacion y de influencia de los waypoints
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, debugDrawRadius);
 
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color.blue;
             Gizmos.DrawWireSphere(transform.position, conectivityRad);
         }
 
         public New_Waypoint NextWaypoint (New_Waypoint previousWaypoint)
         {
-            if(connections.Count == 0)
+            if(connections.Count == 0) //Revisa que la lista contenga objetos
             {
-                //No waypoints, return null and warn
-                Debug.LogError("Insufficient waypoint count");
+                Debug.LogError("Insufficient waypoint count"); //No hay waypoints, avisa de error y devuelve nulo
                 return null;
             }
-            else if(connections.Count == 1 && connections.Contains(previousWaypoint))
+            else if(connections.Count == 1 && connections.Contains(previousWaypoint)) //Revisa si la lista solo tiene 1 elemento y si es el mismo
             {
-                //Only one waypoint and its the previous one
+                Debug.LogWarning("Only one waypoint to move to..."); //Solo existe un waypoint, avisa de error y regresa el mismo
                 return previousWaypoint;
             }
-            else
+            else //Ninguna de las anteriores, encuentra un waypoint aleatorio que no sea el pasado
             {
-                //Find a random waypoint that is not the previous one
                 New_Waypoint nextWaypoint;
+
                 int nextIndex = 0;
 
                 do

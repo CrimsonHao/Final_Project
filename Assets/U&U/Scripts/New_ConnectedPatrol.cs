@@ -7,62 +7,62 @@ namespace Assets.Code
 {
     public class New_ConnectedPatrol : MonoBehaviour
     {
-        //Dictates whether the agent waits on each node
-        [SerializeField] bool patrolWaiting;
+        enum EnemyState { Patrol, Chase };
 
-        //Total time to wait at each node
-        [SerializeField] float totalWaitTime = 3f;
+        [SerializeField] bool patrolWaiting; //Decide si el agente espera en cada nodo o no
 
-        //Probability to change direction
-        [SerializeField] float switchProb = 0.2f;
+        [SerializeField] float totalWaitTime = 3f; //Tiempo total de espera en el nodo
 
-        //Variables to base behaviour
-        NavMeshAgent navMeshAgent;
-        New_Waypoint currentWaypoint;
-        New_Waypoint previousWaypoint;
+        [SerializeField] float switchProb = 0.2f; //Probabilidad de cambio de direccion
 
-        bool isTraveling;
-        bool isWaiting;
-        float waitTimer;
-        int waypointsVisited;
+        [SerializeField] EnemyState currentState; //Estado del enemigo
+
+        NavMeshAgent navMeshAgent;                                                                                  //Variables de comportamiento
+        New_Waypoint currentWaypoint;                                                                               //
+        New_Waypoint previousWaypoint;                                                                              //
+                                                                                                                    //
+        bool isTraveling;                                                                                           //
+        bool isWaiting;                                                                                             //
+        float waitTimer;                                                                                            //
+        int waypointsVisited;                                                                                       //
 
         public void Start()
         {
-            navMeshAgent = this.GetComponent<NavMeshAgent>();
+            navMeshAgent = this.GetComponent<NavMeshAgent>();  //Se asigna el componente "NavMeshAgent" a la variable
 
-            if (navMeshAgent == null)
+            if (navMeshAgent == null) //Revisa en caso que no tenga el componente
             {
                 Debug.LogError("The nav mesh agent component is not ettached to " + gameObject.name);
             }
             else
             {
-                if(currentWaypoint == null)
+                if(currentWaypoint == null) //Revisa si la variable es nula
                 {
-                    //Set it random and grab all waypoints objects in scene
-                    GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint");
+                    GameObject[] allWaypoints = GameObject.FindGameObjectsWithTag("Waypoint"); //Guarda todos los objetos con tag "Waypoint" en un array
 
-                    if(allWaypoints.Length > 0)
+                    if (allWaypoints.Length > 0) // Si el array contiene objetos
                     {
-                        while (currentWaypoint == null)
+                        while (currentWaypoint == null) //Mientras la variable sea nula
                         {
-                            int random = UnityEngine.Random.Range(0, allWaypoints.Length);
-                            New_Waypoint startingWaypoint = allWaypoints[random].GetComponent<New_Waypoint>();
+                            int random = UnityEngine.Random.Range(0, allWaypoints.Length); //Variable local: Numero aleatorio entre 0 y longitud de array
+                            New_Waypoint startingWaypoint = allWaypoints[random].GetComponent<New_Waypoint>(); //Establece la variable startingWaypoint como un objeto random del array "allWaypoints"
 
-                            if(startingWaypoint != null)
+                            if(startingWaypoint != null) //Revisa si startingWaypoint no sea nula
                             {
-                                currentWaypoint = startingWaypoint;
+                                currentWaypoint = startingWaypoint; //Obvio
                             }
                         }
                     }
                     else
                     {
-                        Debug.LogError("Failed to find any waypoints for use in scene");
+                        Debug.LogError("Failed to find any waypoints for use in scene"); //Si no encuentra ningun objeto con el tag
                     }
                 }
 
-                SetDestination();
+                SetDestination(); //Ejecuta el metodo
             }
-            
+
+            currentState = EnemyState.Patrol; //Cambia el estado a patrullaje
         }
 
         public void Update()
