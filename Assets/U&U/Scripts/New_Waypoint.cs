@@ -4,9 +4,10 @@ using UnityEngine;
 
 namespace Assets.Code
 {
-    public class New_Waypoint : Waypoints
+    public class New_Waypoint : MonoBehaviour
     {
         [SerializeField] protected float conectivityRad = 50f; //Radio de conectividad; donde se detectan entre si los waypoints
+        [SerializeField] protected float debugDrawRadius = 0.5f; //Radio de dibujo del waypoint (para ubicacion)
 
         List<New_Waypoint> connections; //Se declara la lista de new_waypoints
 
@@ -30,7 +31,7 @@ namespace Assets.Code
             }
         }
 
-        public override void OnDrawGizmos() //Dibuja el radio de localizacion y de influencia de los waypoints
+        public void OnDrawGizmos() //Dibuja el radio de localizacion y de influencia de los waypoints
         {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, debugDrawRadius);

@@ -8,7 +8,7 @@ namespace Assets.Code
 {
     public class New_ConnectedPatrol : MonoBehaviour
     {
-        enum EnemyState { Patrol, Initializing, Chase };
+        enum EnemyState { Patrol, Initializing, Chase }; //Estados posibles de enemigo
 
         [SerializeField] bool patrolWaiting; //Decide si el agente espera en cada nodo o no
         [SerializeField] float totalWaitTime = 3f; //Tiempo total de espera en el nodo
@@ -82,9 +82,8 @@ namespace Assets.Code
 
             if(Physics.Raycast(detectionRay, out hit, rayDistance, playerMask) && currentState == EnemyState.Patrol) //Si detecta al jugador y no esta en estado de chase
             {
-                navMeshAgent.isStopped = true;
-
                 transform.LookAt(player);
+                navMeshAgent.isStopped = true;
                 isLookingAtPlayer = true;
                 Debug.LogWarning("Player is in VISION RANGE");
 
@@ -98,16 +97,16 @@ namespace Assets.Code
                 isLookingAtPlayer = true;
                 Debug.LogWarning("Player is being chased");
             }
-            else
+            else if (Physics.Raycast(detectionRay, out hit, rayDistance, playerMask) && currentState == EnemyState.Initializing)
             {
-                currentState = EnemyState.Patrol;
-                previousState = EnemyState.Patrol;
+                transform.LookAt(player);
+                isLookingAtPlayer = true;
             }
 
             if (currentState == EnemyState.Initializing && isPreparing == true)
             {
-                StartCoroutine(ChaseTransition());
                 isPreparing = false;
+                StartCoroutine(ChaseTransition());
             }
             else if(currentState == EnemyState.Patrol) //Revisa si el estado del enemigo es Patrullaje
             {
@@ -137,6 +136,8 @@ namespace Assets.Code
                         SetDestination(); //Obvio
                     }
                 }
+
+                previousState = EnemyState.Patrol;
             }
             else if(currentState == EnemyState.Chase)
             {
@@ -172,6 +173,7 @@ namespace Assets.Code
             Vector3 targetVector = currentWaypoint.transform.position;
             navMeshAgent.SetDestination(targetVector);
             isTraveling = true;
+            currentState = EnemyState.Patrol;
 
             float rand = UnityEngine.Random.Range(0.0f, 1.0f);
             if (rand <= switchProb)
@@ -192,6 +194,7 @@ namespace Assets.Code
 
             if(previousState == EnemyState.Patrol && currentState == EnemyState.Initializing)
             {
+                Debug.Log("Enemigo en persecusion");
                 currentState = EnemyState.Chase;
                 previousState = EnemyState.Initializing;
                 navMeshAgent.isStopped = false;
@@ -199,6 +202,7 @@ namespace Assets.Code
             }
             else if(previousState == EnemyState.Chase && currentState == EnemyState.Initializing)
             {
+                Debug.Log("Enemigo empieza a patrullar");
                 currentState = EnemyState.Patrol;
                 previousState = EnemyState.Initializing;
                 navMeshAgent.isStopped = false;
